@@ -14,7 +14,7 @@ class MaKim:
     global_data: Dict[str, Any]
     target_commands: Dict[str, Any]
 
-    def get_target_commands(self, target_file: str, target_name: str) -> List[str]:
+    def get_target_commands(self, target_file: str, target_scope: str, target_name: str) -> List[str]:
         """
         Get the list of target commands from the specified target file and target name.
 
@@ -28,7 +28,7 @@ class MaKim:
         with open(target_file, 'r') as file:
             self.target_commands = yaml.safe_load(file)
             k_commands = self.target_commands[target_name]
-            return list(k_commands['default'].get('targets').keys())
+            return list(k_commands[target_scope].get('targets').keys())
 
     def get_group(self) -> List[str]:
         """
@@ -53,7 +53,9 @@ def targets_list(**kwargs) -> List[str]:
     for file in os.listdir(root_path):
         if file.endswith('.yaml'):
             fname = os.path.join(root_path, file)
-            available_targets.extend(mkm_obj.get_target_commands(fname, 'groups'))
+            target_scope = 'upstream'
+            available_targets.extend(mkm_obj.get_target_commands(fname, target_scope, 'groups'))
+    print(available_targets)
 
     return available_targets
 
