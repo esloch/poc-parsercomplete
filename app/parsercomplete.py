@@ -39,43 +39,45 @@ class MaKim:
         """
         return ["default", "upstream"]
 
+    def targets_list(self, prefix: str, parsed_args, **kwargs) -> List[str]:
+        """
+        Get the list of available targets.
 
-def targets_list(**kwargs) -> List[str]:
-    """
-    Get the list of available targets.
+        Args:
+            prefix: Current completion prefix.
+            parsed_args: Parsed arguments.
 
-    Returns:
-        List of targets.
-    """
-    mkm_obj = MaKim()
+        Returns:
+            List of targets.
+        """
+        selected_group = parsed_args.group
 
-    available_targets = []
-    for file in os.listdir(root_path):
-        if file.endswith('.yaml'):
-            fname = os.path.join(root_path, file)
-            target_scope = 'upstream'
-            available_targets.extend(mkm_obj.get_target_commands(fname, target_scope, 'groups'))
-    print(available_targets)
+        available_targets = []
+        for file in os.listdir(root_path):
+            if file.endswith('.yaml'):
+                fname = os.path.join(root_path, file)
+                available_targets.extend(self.get_target_commands(fname, selected_group, "groups"))
+        return [t for t in available_targets if t.startswith(prefix)]
 
-    return available_targets
+    def targets_group(self, **kwargs) -> List[str]:
+        """
+        Get the list of available groups.
 
+        Returns:
+            List of groups.
+        """
+        return self.get_group()
 
-def targets_group(**kwargs) -> List[str]:
-    """
-    Get the list of available groups.
+    def main(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--group", help="Group list").completer = self.targets_group
+        parser.add_argument("--targets", help="Targets list").completer = self.targets_list
 
-    Returns:
-        List of groups.
-    """
-    mkm_obj = MaKim()
+        argcomplete.autocomplete(parser)
+        args = parser.parse_args()
 
-    return mkm_obj.get_group()
-
+        return args.group, args.targets
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--group", help="Group list").completer = targets_group
-    parser.add_argument("--targets", help="Targets list").completer = targets_list
-
-    argcomplete.autocomplete(parser)
-    args = parser.parse_args()
+    mkm_obj = MaKim()
+    mkm_obj.main()
