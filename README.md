@@ -10,7 +10,7 @@ Parser Auto Complete is a tool that reads targets from YAML files and provides a
 
 ## Usage
 
-1. Run the parser: `python parser_auto_complete.py --group <group_name> --targets <target_name>`
+1. Run the parser: `./app/parser_auto_complete.py --group <group_name> --targets <target_name>`
    - The `--group` option is used to specify the group. Auto-completion will provide a list of available groups.
    - The `--targets` option is used to specify the target. Auto-completion will provide a list of available targets based on the selected group.
 
