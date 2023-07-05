@@ -53,3 +53,26 @@ groups:
       preview_upstream:
         help: Preview documentation page locally
         run: mkdocs serve --watch docs --config-file docs/mkdocs.yaml
+
+  newstart:
+    targets:
+      ncleanup:
+        help: Clean unnecessary temporary files
+        run: |
+          rm -fr build/
+          rm -fr dist/
+          rm -fr .eggs/
+          find . -name '*.egg-info' -exec rm -fr {} +
+          find . -name '*.egg' -exec rm -f {} +
+          find . -name '*.pyc' -exec rm -f {} +
+          find . -name
+          find . -name '__pycache__' -exec rm -fr '*.pyo' -exec rm -f {} +
+          find . -name '*~' -exec rm -f {} +{} +
+          rm -f .coverage
+          rm -fr htmlcov/
+          rm -fr .pytest_cache
+
+      build_n:
+        help: Build documentation
+        run: |
+          mkdocs build --config-file docs/mkdocs.yaml
