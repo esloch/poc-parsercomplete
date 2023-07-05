@@ -20,6 +20,7 @@ class MaKim:
 
         Args:
             target_file: Path to the target file.
+            target_scope: Scope of the target.
             target_name: Name of the target.
 
         Returns:
@@ -28,18 +29,30 @@ class MaKim:
         with open(target_file, 'r') as file:
             self.target_commands = yaml.safe_load(file)
             k_commands = self.target_commands[target_name]
+            if target_scope == 'all':
+                return k_commands
             return list(k_commands[target_scope].get('targets').keys())
 
-    def get_group(self) -> List[str]:
+    def get_available_items(self, target_scope: str, target_name: str) -> List[str]:
         """
-        Get the list of available groups.
+        Get the list of available items (targets or groups).
+
+        Args:
+            target_scope: Scope of the target.
+            target_name: Name of the target.
 
         Returns:
-            List of groups.
+            List of available items.
         """
-        return ["default", "upstream"]
+        available_items = []
+        for file in os.listdir(root_path):
+            if file.endswith('.yaml'):
+                fname = os.path.join(root_path, file)
+                target_commands = self.get_target_commands(fname, target_scope, target_name)
+                available_items.extend(target_commands)
+        return available_items
 
-    def targets_list(self, prefix: str, parsed_args, **kwargs) -> List[str]:
+    def get_available_targets(self, prefix: str, parsed_args: argparse.Namespace, **kwargs) -> List[str]:
         """
         Get the list of available targets.
 
@@ -51,32 +64,27 @@ class MaKim:
             List of targets.
         """
         selected_group = parsed_args.group
+        return [t for t in self.get_available_items(selected_group, 'groups') if t.startswith(prefix)]
 
-        available_targets = []
-        for file in os.listdir(root_path):
-            if file.endswith('.yaml'):
-                fname = os.path.join(root_path, file)
-                available_targets.extend(self.get_target_commands(fname, selected_group, "groups"))
-        return [t for t in available_targets if t.startswith(prefix)]
-
-    def targets_group(self, **kwargs) -> List[str]:
+    def get_available_groups(self, **kwargs) -> List[str]:
         """
         Get the list of available groups.
 
         Returns:
             List of groups.
         """
-        return self.get_group()
+        return self.get_available_items('all', 'groups')
 
     def main(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument("--group", help="Group list").completer = self.targets_group
-        parser.add_argument("--targets", help="Targets list").completer = self.targets_list
+        parser.add_argument("--group", help="Group list").completer = self.get_available_groups
+        parser.add_argument("--targets", help="Targets list").completer = self.get_available_targets
 
         argcomplete.autocomplete(parser)
         args = parser.parse_args()
 
         return args.group, args.targets
+
 
 if __name__ == '__main__':
     mkm_obj = MaKim()
